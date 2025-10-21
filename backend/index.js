@@ -9,11 +9,11 @@ app.use(bodyParser.json());
 
 // Conexión a MySQL real
 const db = mysql.createConnection({
-  host: "mysql.railway.internal",
+  host: "shinkansen.proxy.rlwy.net",
   user: "root",
   password: "izggSjZVGeSdmNkAbXYVtTmOQOHSlVEV",
   database: "railway",
-  port: 3306
+  port: 24739
 });
 
 db.connect(err => {
@@ -27,11 +27,15 @@ db.connect(err => {
 // Registro
 app.post("/register", (req, res) => {
   const { username, password } = req.body;
-  if(!username || !password) return res.json({ success:false, msg:"Faltan datos" });
+  if(!username || !password)
+    return res.json({ success:false, msg:"Faltan datos" });
 
-  const query = "INSERT INTO users (username, password) VALUES (?, ?)";
+  const query = "INSERT INTO Usuarios (Nombre, Contraseña) VALUES (?, ?)";
   db.query(query, [username, password], (err, result) => {
-    if(err) return res.json({ success:false, msg:"Usuario ya existe o error" });
+    if(err) {
+      console.error(err);
+      return res.json({ success:false, msg:"El usuario ya existe o hubo un error" });
+    }
     res.json({ success:true, msg:"Usuario registrado con éxito 🎉" });
   });
 });
@@ -39,13 +43,19 @@ app.post("/register", (req, res) => {
 // Login
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
-  if(!username || !password) return res.json({ success:false, msg:"Faltan datos" });
+  if(!username || !password)
+    return res.json({ success:false, msg:"Faltan datos" });
 
-  const query = "SELECT * FROM users WHERE username=? AND password=?";
+  const query = "SELECT * FROM Usuarios WHERE Nombre=? AND Contraseña=?";
   db.query(query, [username, password], (err, results) => {
-    if(err) return res.json({ success:false, msg:"Error en la DB" });
-    if(results.length > 0) res.json({ success:true, msg:"Login correcto" });
-    else res.json({ success:false, msg:"Usuario o contraseña incorrecta" });
+    if(err) {
+      console.error(err);
+      return res.json({ success:false, msg:"Error en la base de datos" });
+    }
+    if(results.length > 0)
+      res.json({ success:true, msg:"Login correcto" });
+    else
+      res.json({ success:false, msg:"Usuario o contraseña incorrecta" });
   });
 });
 
