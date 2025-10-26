@@ -93,7 +93,7 @@ app.get("/eventos/:usuarioId", (req, res) => {
 
 
 
-
+//AMIGOS
 // Mostrar Usuarios no amigos
 app.get("/solicitudes/:usuarioId", (req, res) => {
     const usuarioId = req.params.usuarioId;
@@ -105,6 +105,20 @@ app.get("/solicitudes/:usuarioId", (req, res) => {
             return res.json({ success: false, Solicitudes_pendientes: [] });
         }
         res.json({ success: true, Solicitudes_pendientes: results });
+    });
+});
+
+// Mostrar Amigos
+app.get("/amigos/:usuarioId", (req, res) => {
+    const usuarioId = req.params.usuarioId;
+
+    const query = "SELECT u.* FROM Usuarios u JOIN Amigos a ON (u.id_usuario = a.id_usuario AND a.id_amigo = ?) OR (u.id_usuario = a.id_amigo AND a.id_usuario = ?) WHERE u.id_usuario != ?;";
+    db.query(query, [usuarioId,usuarioId,usuarioId], (err, results) => {
+        if(err){
+            console.error(err);
+            return res.json({ success: false, Amigos: [] });
+        }
+        res.json({ success: true, Amigos: results });
     });
 });
 
@@ -163,3 +177,4 @@ app.get("/solicitudes/:usuarioId", (req, res) => {
         res.json({ success: true, Solicitudes_pendientes: results });
     });
 });
+
