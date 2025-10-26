@@ -1,0 +1,3 @@
+En el index.html esta la estructura de la pagina.
+En main.js estan los scripts.
+En index.js está la conexión a la base de datos.

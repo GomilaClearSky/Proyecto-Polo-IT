@@ -1,3 +1,6 @@
+
+
+
 import express from "express";
 import mysql from "mysql2";
 import cors from "cors";
@@ -52,10 +55,17 @@ app.post("/login", (req, res) => {
       console.error(err);
       return res.json({ success:false, msg:"Error en la base de datos" });
     }
-    if(results.length > 0)
-      res.json({ success:true, msg:"Login correcto" });
-    else
+    if(results.length > 0) {
+      // Enviamos info del usuario para el front
+      const user = results[0];
+      res.json({ 
+        success: true, 
+        msg: "Login correcto", 
+        user: { nombre: user.Nombre } 
+      });
+    } else {
       res.json({ success:false, msg:"Usuario o contraseña incorrecta" });
+    }
   });
 });
 
