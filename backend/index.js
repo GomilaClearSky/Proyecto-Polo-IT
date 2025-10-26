@@ -75,7 +75,7 @@ app.listen(3000, () => console.log("Servidor corriendo en http://localhost:3000"
 
 
 
-
+//Eventos
 // Endpoint para traer eventos de un usuario
 app.get("/eventos/:usuarioId", (req, res) => {
     const usuarioId = req.params.usuarioId;
@@ -90,6 +90,33 @@ app.get("/eventos/:usuarioId", (req, res) => {
     });
 });
 
+// Crear evento
+app.post("/crear_evento", (req, res) => {
+  const { nombre_evento, descripcion, ubicacion, fecha_inicio, fecha_fin} = req.body; 
+  
+  const query = "INSERT INTO Eventos (nombre, descripcion, ubicacion, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?, ?)";
+  db.query(query, [nombre_evento, descripcion, ubicacion, fecha_inicio, fecha_fin], (err, result) => {
+    if(err) {
+      console.error(err);
+      return res.json({ success:false, msg:"Hubo un error al crear el evento" });
+    }
+    res.json({ success:true, msg:"Evento creado con exito 🎉" });
+  });
+});
+
+// Añadir usuario a evento
+app.post("/aniadir_a_evento", (req, res) => {
+  const { id_usuario, id_evento, estado} = req.body; 
+  
+  const query = "INSERT INTO UsuarioEventos (id_usuario, id_evento, estado) VALUES (?, ?, ?)";
+  db.query(query, [id_usuario, id_evento, estado], (err, result) => {
+    if(err) {
+      console.error(err);
+      return res.json({ success:false, msg:"Hubo un error al añadir al usuario el evento" });
+    }
+    res.json({ success:true, msg:"Usuario añadido al Evento con exito 🎉" });
+  });
+});
 
 
 
@@ -177,4 +204,7 @@ app.get("/solicitudes/:usuarioId", (req, res) => {
         res.json({ success: true, Solicitudes_pendientes: results });
     });
 });
+
+
+
 
