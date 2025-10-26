@@ -80,12 +80,86 @@ app.listen(3000, () => console.log("Servidor corriendo en http://localhost:3000"
 app.get("/eventos/:usuarioId", (req, res) => {
     const usuarioId = req.params.usuarioId;
 
-    const query = "SELECT e.* FROM Eventos e JOIN `Usuario-Evento` ue ON e.ID_Evento = ue.ID_Evento WHERE ue.ID_Usuario = ?";
+    const query = "SELECT e.* FROM Eventos e JOIN `UsuarioEventos` ue ON e.ID_Evento = ue.ID_Evento WHERE ue.ID_Usuario = ?";
     db.query(query, [usuarioId], (err, results) => {
         if(err){
             console.error(err);
             return res.json({ success: false, eventos: [] });
         }
         res.json({ success: true, eventos: results });
+    });
+});
+
+
+
+
+
+// Mostrar Usuarios no amigos
+app.get("/solicitudes/:usuarioId", (req, res) => {
+    const usuarioId = req.params.usuarioId;
+
+    const query = "SELECT u.* FROM Usuarios u LEFT JOIN Amigos a ON (u.id_usuario = a.id_usuario AND a.id_amigo = ?) OR (u.id_usuario = a.id_amigo AND a.id_usuario = ?) WHERE a.id_usuario IS NULL AND u.id_usuario != ?;";
+    db.query(query, [usuarioId,usuarioId,usuarioId], (err, results) => {
+        if(err){
+            console.error(err);
+            return res.json({ success: false, Solicitudes_pendientes: [] });
+        }
+        res.json({ success: true, Solicitudes_pendientes: results });
+    });
+});
+
+// Solicitud Amistad
+app.post("/Solicitud_Amistad", (req, res) => {
+  const { id, other_id } = req.body; //Recibe la id propia y la id de la otra persona
+  
+  const query = "INSERT INTO Amigos (id_usuario, id_amigo, estado) VALUES (?, ?, 'Pendiente')";
+  db.query(query, [id, other_id], (err, result) => {
+    if(err) {
+      console.error(err);
+      return res.json({ success:false, msg:"Hubo un error con la solicitud de amistad" });
+    }
+    res.json({ success:true, msg:"Solicitud de Amistad enviada 🎉" });
+  });
+});
+
+// Aceptar Solicitud Amistad
+app.post("/Aceptar solicitud", (req, res) => {
+  const { amigo_id } = req.body; //Recibe la id de la amistad
+  
+  const query = "UPDATE Amigos SET estado = 'Aceptado' WHERE id_amigos = ?";
+  db.query(query, [amigo_id], (err, result) => {
+    if(err) {
+      console.error(err);
+      return res.json({ success:false, msg:"Hubo un error al aceptar la amistad" });
+    }
+    res.json({ success:true, msg:"Amistad aceptada 🎉" });
+  });
+});
+
+// Rechazar Solicitud Amistad
+app.post("/Aceptar_solicitud", (req, res) => {
+  const { amigo_id } = req.body; //Recibe la id de la amistad
+  
+  const query = "DELETE FROM Amigos WHERE id_amigos = ?";
+  db.query(query, [amigo_id], (err, result) => {
+    if(err) {
+      console.error(err);
+      return res.json({ success:false, msg:"Hubo un error al rechazar la amistad" });
+    }
+    res.json({ success:true, msg:"Amistad rechazada" });
+  });
+});
+
+// Mostrar Solicitudes de Amistad
+app.get("/solicitudes/:usuarioId", (req, res) => {
+    const usuarioId = req.params.usuarioId;
+
+    const query = "SELECT * FROM Amigos WHERE id_amigo = ?";
+    db.query(query, [usuarioId], (err, results) => {
+        if(err){
+            console.error(err);
+            return res.json({ success: false, Solicitudes_pendientes: [] });
+        }
+        res.json({ success: true, Solicitudes_pendientes: results });
     });
 });
