@@ -70,3 +70,22 @@ app.post("/login", (req, res) => {
 });
 
 app.listen(3000, () => console.log("Servidor corriendo en http://localhost:3000"));
+
+
+
+
+
+
+// Endpoint para traer eventos de un usuario
+app.get("/eventos/:usuarioId", (req, res) => {
+    const usuarioId = req.params.usuarioId;
+
+    const query = "SELECT e.* FROM Eventos e JOIN `Usuario-Evento` ue ON e.ID_Evento = ue.ID_Evento WHERE ue.ID_Usuario = ?";
+    db.query(query, [usuarioId], (err, results) => {
+        if(err){
+            console.error(err);
+            return res.json({ success: false, eventos: [] });
+        }
+        res.json({ success: true, eventos: results });
+    });
+});
