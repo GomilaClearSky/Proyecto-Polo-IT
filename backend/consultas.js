@@ -16,7 +16,7 @@ const db = mysql.createConnection({
 });
 
 // Hacer una consulta simple
-db.query("SELECT * FROM UsuarioEventos", (err, results) => {
+db.query("SELECT DISTINCT u.* FROM Usuarios u JOIN Amigos a ON (a.id_usuario = u.id_usuario AND a.id_amigo = 2) OR (a.id_amigo = u.id_usuario AND a.id_usuario = 2) WHERE u.id_usuario != 2;", (err, results) => {
   if (err) {
     console.error("Error al consultar la base:", err);
   } else {

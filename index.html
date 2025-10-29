@@ -30,13 +30,22 @@
         <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sit et dicta quasi autem? Quibusdam praesentium consequatur molestiae ipsa quidem enim. Quo expedita necessitatibus perferendis blanditiis hic eius est similique perspiciatis?</p>
     </div>
 
+
+
+
+
+
+    <!-- PERFIL USUARIO --> 
+    <!-- PERFIL USUARIO --> 
+    <!-- PERFIL USUARIO --> 
+
     <div id="perfilUsuario" style="display:none; padding:130px 30px 30px 30px; min-height: 80vh; background:#f0f0f0;">
         <div class="perfil-container">
             <img src="images/avatar.png" alt="Foto de perfil grande" class="perfil-foto">
             <div class="perfil-info">
                 <h2 id="nombreUsuario">Nombre de Usuario</h2>
                 <p id="fechaIngreso">Se unió el: 15/03/2023</p>
-                <p id="cantidadAmigos">Amigos: 12</p>
+                <p class="clickeable" id="cantidadAmigos">Amigos: 1</p>
                 
             </div>
         </div>
@@ -48,6 +57,25 @@
         <button id="logoutBtn" style="margin-top: 20px; padding: 10px 20px; cursor:pointer; border:none; background:#ff5757; color:#fff; border-radius:5px;">Cerrar sesión</button>
         </div>
     </div>
+
+            <!-- LISTA AMIGOS -->   
+            <!-- LISTA AMIGOS -->   
+            <!-- LISTA AMIGOS -->   
+
+    <div id="listaAmigos" style="display:none; padding:130px 30px 30px 30px; min-height: 80vh; background:#f0f0f0;">
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+    
 
 <!--STYLES PARA LETRAS Y BOTONES -->
 <!--STYLES PARA LETRAS Y BOTONES -->
@@ -94,6 +122,39 @@
     <!--STYLES de misEVENTOS -->
     <!--STYLES de misEVENTOS -->
     <!--STYLES de misEVENTOS -->
+
+    <style>
+        .clickeable {
+        cursor: pointer;
+        display: inline-block;
+        font-size: 18px;
+        color: #333;
+        transition: all 0.3s ease;
+        position: relative;
+        }
+
+        .clickeable:hover {
+        color: #ff4081;
+        transform: scale(1.05);
+        text-shadow: 0 0 8px rgba(255, 64, 129, 0.5);
+        }
+
+        .clickeable::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -3px;
+        width: 0;
+        height: 2px;
+        background-color: #ff4081;
+        transition: width 0.3s ease;
+        }
+
+        .clickeable:hover::after {
+        width: 100%;
+        }
+    </style>
+    
 
 <!--STYLES PARA LETRAS Y BOTONES -->
 <!--STYLES PARA LETRAS Y BOTONES -->

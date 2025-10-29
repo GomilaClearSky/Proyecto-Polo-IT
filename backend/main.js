@@ -134,7 +134,8 @@ const secciones = {
     inicio: document.getElementById('contenidoPrincipal'),
     perfil: document.getElementById('perfilUsuario'),
     misEventos: document.getElementById('misEventos'),
-    crearEvento: document.getElementById('crearEvento')
+    crearEvento: document.getElementById('crearEvento'),
+    listaAmigos: document.getElementById('listaAmigos')
 };
 
 // ----------------------
@@ -162,9 +163,21 @@ function mostrarSeccion(nombre) {
 }
 
 function actualizarPerfil(usuario) {
-    document.getElementById('nombreUsuario').textContent = usuario.nombre;
-    document.getElementById('fechaIngreso').textContent = `Se unió el: ${usuario.fecha}`;
-    document.getElementById('cantidadAmigos').textContent = `Amigos: ${usuario.amigos}`;
+    const nombreUsuario = document.getElementById('nombreUsuario');
+    const fechaIngreso = document.getElementById('fechaIngreso');
+    const cantidadAmigos = document.getElementById('cantidadAmigos');
+
+    nombreUsuario.textContent = usuario.nombre;
+    fechaIngreso.textContent = `Se unió el: ${usuario.fecha}`;
+    cantidadAmigos.textContent = `Amigos: ${usuario.amigos}`;
+
+    // 🔹 Event listener para mostrar la lista de amigos
+    cantidadAmigos.addEventListener("click", () => {
+        mostrarSeccion('listaAmigos');
+        console.log("Amigos apretado");
+        const userId = localStorage.getItem("loggedUserId");
+        if(userId) cargarAmigos(userId);
+    });
 }
 
 // ----------------------
@@ -202,7 +215,7 @@ async function cargarMisEventos(userId) {
                 <h1>Mis Eventos</h1>
                 <p>Tienes ${data.eventos.length} evento(s) próximos:</p>
                 <ul>
-                    ${data.eventos.map(e => `<li>${e.NombreEvento}</li>`).join('')}
+                    ${data.eventos.map(e => `<li>${e.nombre}</li>`).join('')}
                 </ul>
                 <button>Botón 1</button>
                 <button>Botón 2</button>
@@ -251,11 +264,9 @@ const mensajeEvento = document.getElementById("mensajeEvento");
 
 
 
-//PANTALLA DE MIS EVENTOS
-//PANTALLA DE MIS EVENTOS
-//PANTALLA DE MIS EVENTOS
-
-
+// --------------------------
+// --------------------------
+// --------------------------
 
 
 // Mi Perfil
@@ -271,11 +282,54 @@ userProfile.addEventListener('click', () => {
   const usuario = {
     nombre: savedUser || "Usuario desconocido",
     fecha: "31/10/2024",
-    amigos: 9
+    amigos: 1
   };
 
   actualizarPerfil(usuario);
 });
+
+// Lista amigos
+
+async function cargarAmigos(userId) {
+    const listaAmigosDiv = document.getElementById("listaAmigos");
+    listaAmigosDiv.innerHTML = ""; // limpiamos antes
+
+    try {
+        const res = await fetch(`http://localhost:3000/amigos/${userId}`);
+        const data = await res.json();
+
+        if(data.success && data.amigos.length > 0){
+            data.amigos.forEach(amigo => {
+                const amigoDiv = document.createElement("div");
+                amigoDiv.classList.add("amigo");
+                amigoDiv.style.display = "flex";
+                amigoDiv.style.alignItems = "center";
+                amigoDiv.style.cursor = "pointer";
+                amigoDiv.style.marginBottom = "10px";
+
+                amigoDiv.innerHTML = `
+                    <img src="images/avatar.png" alt="Foto amigo" style="width:40px; height:40px; border-radius:50%; margin-right:10px;">
+                    <span>${amigo.nombre}</span>
+                `;
+
+                // Función al click
+                amigoDiv.addEventListener("click", () => {
+                    // reemplazá esto por la acción real
+                    alert(`Hiciste click en ${amigo.nombre}`);
+                });
+
+                listaAmigosDiv.appendChild(amigoDiv);
+            });
+        } else {
+            // Si no tiene amigos
+            listaAmigosDiv.innerHTML = `<p>No tenés amigos 😢</p>`;
+        }
+
+    } catch(err) {
+        console.error("Error al cargar amigos:", err);
+        listaAmigosDiv.innerHTML = `<p>Error al cargar los amigos 😬</p>`;
+    }
+}
 
 
 

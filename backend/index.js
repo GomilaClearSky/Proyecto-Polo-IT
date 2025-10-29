@@ -40,7 +40,7 @@ app.post("/register", (req, res) => {
       return res.json({ success:false, msg:"El usuario ya existe o hubo un error" });
     }
     res.json({ success:true, msg:"Usuario registrado con éxito 🎉" });
-    location.reload();
+
   });
 });
 
@@ -161,13 +161,13 @@ app.get("/solicitudes/:userId", (req, res) => {
 app.get("/amigos/:userId", (req, res) => {
     const userId = req.params.userId;
 
-    const query = "SELECT u.* FROM Usuarios u JOIN Amigos a ON (u.id_usuario = a.id_usuario AND a.id_amigo = ?) OR (u.id_usuario = a.id_amigo AND a.id_usuario = ?) WHERE u.id_usuario != ?;";
+    const query = "SELECT DISTINCT u.id_usuario, u.nombre FROM Usuarios u JOIN Amigos a ON (a.id_usuario = ? AND a.id_amigo = u.id_usuario) OR (a.id_amigo = ? AND a.id_usuario = u.id_usuario) WHERE u.id_usuario != ?;";
     db.query(query, [userId,userId,userId], (err, results) => {
         if(err){
             console.error(err);
-            return res.json({ success: false, Amigos: [] });
+            return res.json({ success: false, amigos: [] });
         }
-        res.json({ success: true, Amigos: results });
+        res.json({ success: true, amigos: results });
     });
 });
 
