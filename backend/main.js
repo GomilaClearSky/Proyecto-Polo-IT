@@ -17,6 +17,8 @@ let isLogin = true;
 
 
 const savedUser = localStorage.getItem("loggedUser");
+const userId = localStorage.getItem("loggedUserId");
+
 if (savedUser) {
                 loginBtn.style.display = 'none';
                 userProfile.style.display = 'flex';
@@ -38,14 +40,16 @@ modalOverlay.addEventListener('click', (e) => {
 // Alternar login/registro
 toggleLink.addEventListener('click', () => {
     isLogin = !isLogin;
-    if(isLogin){
+    if (isLogin) {
         modalTitle.textContent = "Iniciar sesión";
         modalForm.querySelector('button').textContent = "Ingresar";
-        document.getElementById('toggleText').innerHTML = '¿No tenés una cuenta? <span id="toggleLink">Registrate</span>';
+        toggleLink.textContent = "Registrate";
+        toggleText.firstChild.textContent = "¿No tenés una cuenta? ";
     } else {
         modalTitle.textContent = "Registrarse";
         modalForm.querySelector('button').textContent = "Registrarse";
-        document.getElementById('toggleText').innerHTML = '¿Ya tenés cuenta? <span id="toggleLink">Iniciar sesión</span>';
+        toggleLink.textContent = "Iniciar sesión";
+        toggleText.firstChild.textContent = "¿Ya tenés cuenta? ";
     }
     // reasignar event listener
     document.getElementById('toggleLink').addEventListener('click', arguments.callee);
@@ -66,25 +70,59 @@ modalForm.addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
         });
+
         const data = await res.json();
 
-        if(data.success){
+        if (data.success) {
             localStorage.setItem("loggedUser", username);
-            if(isLogin){
+            localStorage.setItem("loggedUserId", data.user.id); // 🔹 guardamos el ID
 
+            if (isLogin) {
+                // Login exitoso
                 loginBtn.style.display = 'none';
                 userProfile.style.display = 'flex';
                 modalOverlay.style.display = 'none';
+                document.getElementById("nombreUsuario").textContent = username;
             } else {
-                alert(data.msg); // mensaje de registro exitoso
+                // Registro exitoso → cerrar modal y resetear a login
+                alert(data.msg);
+                modalOverlay.style.display = 'none';
+                isLogin = true;
+                modalTitle.textContent = "Iniciar sesión";
+                modalForm.querySelector('button').textContent = "Ingresar";
+                toggleLink.textContent = "Registrate";
+                toggleText.firstChild.textContent = "¿No tenés una cuenta? ";
             }
         } else {
             alert(data.msg);
         }
-    } catch(err){
+
+    } catch (err) {
         console.error('Error al conectarse al servidor', err);
     }
 });
+
+
+
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+        // Borrar el usuario del localStorage
+        localStorage.removeItem("loggedUser");
+        localStorage.removeItem("loggedUserId");  // 🔹 borrar ID
+
+        // Mostrar el botón de login y ocultar el perfil
+        loginBtn.style.display = 'block';
+        userProfile.style.display = 'none';
+
+        // (Opcional) Redirigir al inicio
+        // o simplemente:
+        // location.reload();
+
+        alert("Sesión cerrada correctamente 👋");
+    });
+}
 
 // ----------------------
 // BOTON PARA IR AL PERFIL
@@ -139,8 +177,8 @@ btnInicio.addEventListener('click', () => mostrarSeccion('inicio'));
 // Mis Eventos
 btnMisEventos.addEventListener('click', () => {
     mostrarSeccion('misEventos');
-    const usuarioId = 1; // reemplazá con el ID real del usuario logueado
-    cargarMisEventos(usuarioId);
+    const userId = localStorage.getItem("loggedUserId");
+    cargarMisEventos(userId); // 👈 esto vuelve a pedir los eventos
 });
 
 
@@ -148,12 +186,12 @@ btnMisEventos.addEventListener('click', () => {
 //PANTALLA DE MIS EVENTOS
 //PANTALLA DE MIS EVENTOS
 
-
-async function cargarMisEventos(usuarioId) {
+ 
+async function cargarMisEventos(userId) {
     const divMisEventos = document.getElementById("misEventos");
 
     try {
-        const res = await fetch(`http://localhost:3000/eventos/${usuarioId}`);
+        const res = await fetch(`http://localhost:3000/eventos/${userId}`);
         const data = await res.json();
 
         divMisEventos.innerHTML = ""; // limpiamos antes
@@ -204,6 +242,15 @@ async function cargarMisEventos(usuarioId) {
 }
 
 
+
+////
+
+const formCrearEvento = document.getElementById("formCrearEvento");
+const mensajeEvento = document.getElementById("mensajeEvento");
+
+
+
+
 //PANTALLA DE MIS EVENTOS
 //PANTALLA DE MIS EVENTOS
 //PANTALLA DE MIS EVENTOS
@@ -228,4 +275,60 @@ userProfile.addEventListener('click', () => {
   };
 
   actualizarPerfil(usuario);
+});
+
+
+
+
+
+
+
+// CREAR UN EVENTO
+// OH YEAH BABYYYYYYYYYYYY
+
+formCrearEvento.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const nombre_evento = document.getElementById("nombre_evento").value.trim();
+  const descripcion = document.getElementById("descripcion").value.trim();
+  const ubicacion = document.getElementById("ubicacion").value.trim();
+  const fecha_inicio = document.getElementById("fecha_inicio").value;
+  const fecha_fin = document.getElementById("fecha_fin").value;
+
+
+  const userId = localStorage.getItem("loggedUserId");
+
+  // Validación básica
+  if (!nombre_evento || !descripcion || !ubicacion || !fecha_inicio || !fecha_fin) {
+    mensajeEvento.textContent = "Por favor completá todos los campos 🫶";
+    mensajeEvento.style.color = "red";
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:3000/crear_evento", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre_evento, descripcion, ubicacion, fecha_inicio, fecha_fin, userId })
+      
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      mensajeEvento.textContent = data.msg;
+      mensajeEvento.style.color = "green";
+      formCrearEvento.reset();
+
+      
+    } else {
+      mensajeEvento.textContent = data.msg || "Error al crear el evento 😕";
+      mensajeEvento.style.color = "red";
+    }
+
+  } catch (err) {
+    console.error("Error:", err);
+    mensajeEvento.textContent = "Hubo un error al conectar con el servidor 😬";
+    mensajeEvento.style.color = "red";
+  }
 });
